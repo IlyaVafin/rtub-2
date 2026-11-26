@@ -46,11 +46,12 @@ class VideoController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
         $data = $request->validate([
             "name" => "required|string|min:3|max:255",
             "description" => "sometimes|string|min:10",
             "preview" => "sometimes|image|mimes:png,jpg|max:2560",
-            "video" => "required|mimetype:video/mp4|max:4096",
+            "video" => "required|mimes:mp4|max:4096",
         ]);
         $videoPath = $request->file("video")->store("video");
         $previewPath = null;
@@ -59,9 +60,10 @@ class VideoController extends Controller
         }
         $video = Video::create([
             "name" => $data["name"],
-            "description" => $data["description"],
-            "preview" => Storage::disk('public')->url($previewPath),
-            "video" => Storage::disk('public')->url($videoPath),
+            "description" => $data["description"] ?? "",
+            "user_id" => $user->id,
+            "preview" => $previewPath,
+            "video" => $videoPath,
         ]);
         $video->withDescription = true;
         $video->withVideo = true;
@@ -75,10 +77,10 @@ class VideoController extends Controller
      */
     public function show(Video $video)
     {
-        $video->withDescription = true;
+        $video->update(['views' => $video->views + 1]);
         return response()->json([
             "data" => [
-                "video" => new VideoResource($video),
+                "video" => new VideoResource($video)->additional(["withDescription" => true]),
             ]
         ]);
     }

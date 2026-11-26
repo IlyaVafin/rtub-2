@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('donates', function (Blueprint $table) {
             $table->id();
             $table->decimal('sum');
+            $table->string('status')->default('pending');
             $table->foreignId('user_id')->constrained();
             $table->string('donater');
             $table->timestamps();

@@ -8,6 +8,7 @@ use App\Http\Resources\VideoResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -46,7 +47,17 @@ class UserController extends Controller
                 }
                 $data['nickname'] = $result;
             }
-            $user = User::create($data);
+            $imagePath = null;
+            if($request->hasFile('avatar')) {
+                $imagePath = $request->file('avatar')->store('avatars', 'public');
+            }
+            $user = User::create([
+                'nickname' => $data['nickname'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'birthdate' => new \DateTimeImmutable($data['birthdate'])->format('Y-m-d'),
+                'avatar' => $imagePath,
+            ]);
             $token = Str::uuid();
             $user->update(["token" => $token]);
             return response()->json([

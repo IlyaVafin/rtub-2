@@ -17,6 +17,7 @@ return new class extends Migration
             $table->boolean('superuser')->default(false);
             $table->string('token')->nullable();
             $table->date('birthdate');
+            $table->decimal('balance')->default(0);
             $table->string('avatar')->nullable();
             $table->string('email')->unique();
             $table->string('password');
